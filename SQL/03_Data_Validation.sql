@@ -1,0 +1,160 @@
+-- =======================================================================
+-- Project: Personal Expenses Dashboard
+-- Purpose: Data validation queries for the EXPENSES table (Oracle 10g)
+-- =======================================================================
+
+-- 1. Total number of transactions
+SELECT COUNT(*) AS TOTAL_TRANSACTIONS
+FROM EXPENSES;
+
+
+-- 2. Duplicate transactions
+SELECT
+    EXPENSE_DATE,
+    CATEGORY,
+    DESCRIPTION,
+    PAYMENT_METHOD,
+    AMOUNT,
+    COUNT(*) AS DUPLICATE_COUNT
+FROM EXPENSES
+GROUP BY
+    EXPENSE_DATE,
+    CATEGORY,
+    DESCRIPTION,
+    PAYMENT_METHOD,
+    AMOUNT
+HAVING COUNT(*) > 1;
+
+
+-- 3. NULL values
+SELECT
+    SUM(CASE WHEN EXPENSE_ID IS NULL THEN 1 ELSE 0 END) AS NULL_EXPENSE_ID,
+    SUM(CASE WHEN EXPENSE_DATE IS NULL THEN 1 ELSE 0 END) AS NULL_EXPENSE_DATE,
+    SUM(CASE WHEN CATEGORY IS NULL THEN 1 ELSE 0 END) AS NULL_CATEGORY,
+    SUM(CASE WHEN DESCRIPTION IS NULL THEN 1 ELSE 0 END) AS NULL_DESCRIPTION,
+    SUM(CASE WHEN PAYMENT_METHOD IS NULL THEN 1 ELSE 0 END) AS NULL_PAYMENT_METHOD,
+    SUM(CASE WHEN AMOUNT IS NULL THEN 1 ELSE 0 END) AS NULL_AMOUNT
+FROM EXPENSES;
+
+
+-- 4. Invalid or suspicious dates
+SELECT *
+FROM EXPENSES
+WHERE EXTRACT(YEAR FROM EXPENSE_DATE) < 2000
+   OR EXTRACT(YEAR FROM EXPENSE_DATE) > 2100;
+
+
+-- 5. Zero amounts
+SELECT *
+FROM EXPENSES
+WHERE AMOUNT = 0;
+
+
+-- 6. Negative amounts
+SELECT *
+FROM EXPENSES
+WHERE AMOUNT < 0;
+
+
+-- 7. Categories and transaction counts
+SELECT
+    CATEGORY,
+    COUNT(*) AS TRANSACTION_COUNT
+FROM EXPENSES
+GROUP BY CATEGORY
+ORDER BY TRANSACTION_COUNT DESC;
+
+
+-- 8. Payment methods and transaction counts
+SELECT
+    PAYMENT_METHOD,
+    COUNT(*) AS TRANSACTION_COUNT
+FROM EXPENSES
+GROUP BY PAYMENT_METHOD
+ORDER BY TRANSACTION_COUNT DESC;
+
+
+-- 9. Minimum transaction date
+SELECT MIN(EXPENSE_DATE) AS MIN_DATE
+FROM EXPENSES;
+
+
+-- 10. Maximum transaction date
+SELECT MAX(EXPENSE_DATE) AS MAX_DATE
+FROM EXPENSES;
+
+
+-- 11. Minimum expense amount
+SELECT MIN(AMOUNT) AS MIN_AMOUNT
+FROM EXPENSES;
+
+
+-- 12. Maximum expense amount
+SELECT MAX(AMOUNT) AS MAX_AMOUNT
+FROM EXPENSES;
+
+
+-- 13. Total expenses
+SELECT SUM(AMOUNT) AS TOTAL_EXPENSES
+FROM EXPENSES;
+
+
+-- 14. Average expense
+SELECT ROUND(AVG(AMOUNT), 2) AS AVERAGE_EXPENSE
+FROM EXPENSES;
+
+
+-- 15. Expenses by category
+SELECT
+    CATEGORY,
+    COUNT(*) AS TRANSACTION_COUNT,
+    SUM(AMOUNT) AS TOTAL_AMOUNT
+FROM EXPENSES
+GROUP BY CATEGORY
+ORDER BY TOTAL_AMOUNT DESC;
+
+
+-- 16. Expenses by payment method
+SELECT
+    PAYMENT_METHOD,
+    COUNT(*) AS TRANSACTION_COUNT,
+    SUM(AMOUNT) AS TOTAL_AMOUNT
+FROM EXPENSES
+GROUP BY PAYMENT_METHOD
+ORDER BY TOTAL_AMOUNT DESC;
+
+
+-- 17. Monthly expense totals
+SELECT
+    TO_CHAR(EXPENSE_DATE, 'YYYY-MM') AS EXPENSE_MONTH,
+    COUNT(*) AS TRANSACTION_COUNT,
+    SUM(AMOUNT) AS MONTHLY_TOTAL
+FROM EXPENSES
+GROUP BY TO_CHAR(EXPENSE_DATE, 'YYYY-MM')
+ORDER BY EXPENSE_MONTH;
+
+
+-- 18. Check whether EXPENSE_ID values are unique
+SELECT
+    EXPENSE_ID,
+    COUNT(*) AS ID_COUNT
+FROM EXPENSES
+GROUP BY EXPENSE_ID
+HAVING COUNT(*) > 1;
+
+
+-- 19. Check categories present in the database
+SELECT DISTINCT CATEGORY
+FROM EXPENSES
+ORDER BY CATEGORY;
+
+
+-- 20. Check payment methods present in the database
+SELECT DISTINCT PAYMENT_METHOD
+FROM EXPENSES
+ORDER BY PAYMENT_METHOD;
+
+
+-- =======================================================================
+-- END OF VALIDATION SCRIPT
+-- =======================================================================
